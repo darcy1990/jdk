@@ -626,18 +626,18 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
             n = (tab = resize()).length;
-        if ((p = tab[i = (n - 1) & hash]) == null)
-            tab[i] = newNode(hash, key, value, null);
+        if ((p = tab[i = (n - 1) & hash]) == null) // 查找bin, hash(hashcode(key))
+            tab[i] = newNode(hash, key, value, null); // bin为空，直接添加节点
         else {
             Node<K,V> e; K k;
             if (p.hash == hash &&
                 ((k = p.key) == key || (key != null && key.equals(k))))
                 e = p;
-            else if (p instanceof TreeNode)
+            else if (p instanceof TreeNode) // 首节点是treeNode，插入红黑树节点
                 e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
             else {
-                for (int binCount = 0; ; ++binCount) {
-                    if ((e = p.next) == null) {
+                for (int binCount = 0; ; ++binCount) { // 首节点是链表节点
+                    if ((e = p.next) == null) { // 循环链表，如果找到该元素（key == or key.equals()），则替换并返回，如果不存在该元素，将新的元素添加到末尾
                         p.next = newNode(hash, key, value, null);
                         if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
                             treeifyBin(tab, hash);
@@ -675,6 +675,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
      */
     final Node<K,V>[] resize() {
         Node<K,V>[] oldTab = table;
+        // 确定 newCap, newThreshHold
         int oldCap = (oldTab == null) ? 0 : oldTab.length;
         int oldThr = threshold;
         int newCap, newThr = 0;
@@ -708,13 +709,14 @@ public class HashMap<K,V> extends AbstractMap<K,V>
                 if ((e = oldTab[j]) != null) {
                     oldTab[j] = null;
                     if (e.next == null)
-                        newTab[e.hash & (newCap - 1)] = e;
+                        newTab[e.hash & (newCap - 1)] = e; // oldTab 只有一个节点，根据hash & newCap -1  到新的 tab index
                     else if (e instanceof TreeNode)
-                        ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
+                        ((TreeNode<K,V>)e).split(this, newTab, j, oldCap); // oldTab 首节点是treeNode， split该节点
                     else { // preserve order
                         Node<K,V> loHead = null, loTail = null;
                         Node<K,V> hiHead = null, hiTail = null;
                         Node<K,V> next;
+                        // 遍历oldTab的节点，根据 hash & oldCap 判断是留在低位bin（index不变），还是高位bin
                         do {
                             next = e.next;
                             if ((e.hash & oldCap) == 0) {
@@ -758,6 +760,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         else if ((e = tab[index = (n - 1) & hash]) != null) {
             TreeNode<K,V> hd = null, tl = null;
             do {
+                // 先构建TreeNode双向链表
                 TreeNode<K,V> p = replacementTreeNode(e, null);
                 if (tl == null)
                     hd = p;
@@ -1116,7 +1119,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
             }
         }
         V v = mappingFunction.apply(key);
-        if (old != null) {
+        if (old != null) { // old != null && old.value == null
             old.value = v;
             afterNodeAccess(old);
             return v;
@@ -1126,7 +1129,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         else if (t != null)
             t.putTreeVal(this, tab, hash, key, v);
         else {
-            tab[i] = newNode(hash, key, v, first);
+            tab[i] = newNode(hash, key, v, first); // 头插法
             if (binCount >= TREEIFY_THRESHOLD - 1)
                 treeifyBin(tab, hash);
         }
@@ -1446,6 +1449,7 @@ public class HashMap<K,V> extends AbstractMap<K,V>
         }
     }
 
+    // iterator 模式
     final class KeyIterator extends HashIterator
         implements Iterator<K> {
         public final K next() { return nextNode().key; }

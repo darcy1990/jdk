@@ -195,6 +195,7 @@ public final class String
             throw new StringIndexOutOfBoundsException(count);
         }
         // Note: offset or count might be near -1>>>1.
+        // offset + count > value.length might overflow.
         if (offset > value.length - count) {
             throw new StringIndexOutOfBoundsException(offset + count);
         }
@@ -1397,6 +1398,7 @@ public final class String
             return false;
         }
         while (--pc >= 0) {
+            // 对循环变量用++, 写起来更简洁
             if (ta[to++] != pa[po++]) {
                 return false;
             }
@@ -1454,6 +1456,12 @@ public final class String
         if (h == 0 && value.length > 0) {
             char val[] = value;
 
+            /**
+             * 之所以使用 31， 是因为他是一个奇素数。如果乘数是偶数，并且乘法溢出的话，信息就会丢失，因为与2相乘等价于移位运算（低位补0）。
+             * 使用素数的好处并不很明显，但是习惯上使用素数来计算散列结果。
+             * 31 有个很好的性能，即用移位和减法来代替乘法，可以得到更好的性能： 31 * i == (i << 5）- i， 现代的 VM 可以自动完成这种优化。
+             * 这个公式可以很简单的推导出来。
+             */
             for (int i = 0; i < value.length; i++) {
                 h = 31 * h + val[i];
             }
@@ -2054,7 +2062,7 @@ public final class String
         if (oldChar != newChar) {
             int len = value.length;
             int i = -1;
-            char[] val = value; /* avoid getfield opcode */
+            char[] val = value; /* avoid getfield opcode 字节码层级优化 */
 
             while (++i < len) {
                 if (val[i] == oldChar) {
@@ -3148,6 +3156,11 @@ public final class String
      *
      * @return  a string that has the same contents as this string, but is
      *          guaranteed to be from a pool of unique strings.
+     */
+    /**
+     * "a", 直接使用双引号声明出来的String对象会直接存储在常量池中。
+     * new String("a") 如果不是用双引号声明的String对象，可以使用String提供的intern方法。intern 方法会从字符串常量池中查询当前字符串是否存在，若不存在就会将当前字符串放入常量池中
+     * @return
      */
     public native String intern();
 }
