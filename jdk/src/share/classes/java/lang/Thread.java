@@ -1731,6 +1731,7 @@ class Thread implements Runnable {
      * @since   1.5
      * @see #getState
      */
+    // 这里和很多博客说的不太一样
     public enum State {
         /**
          * Thread state for a thread which has not yet started.

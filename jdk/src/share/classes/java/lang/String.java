@@ -3061,6 +3061,7 @@ public final class String
      *          {@code "true"} is returned; otherwise, a string equal to
      *          {@code "false"} is returned.
      */
+    // 很棒的方法
     public static String valueOf(boolean b) {
         return b ? "true" : "false";
     }
