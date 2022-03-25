@@ -274,6 +274,7 @@ import java.util.stream.Stream;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
+// ConcurrentHashMap, 使用synchronized 同步首个节点，使用counterCells进行分布式计数
 // 遗留的细节：sizeCtl，counterCells
 public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
     implements ConcurrentMap<K,V>, Serializable {

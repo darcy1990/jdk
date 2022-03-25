@@ -324,14 +324,14 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      *   runState,    indicating whether running, shutting down etc
      *
      * In order to pack them into one int, we limit workerCount to
-     * (2^29)-1 (about 500 million) threads rather than (2^31)-1 (2
+     * (2^29)-1 (about 500 million) threads rather than (2^31)-1 (2 // 最多(2^29)-1 个线程，够用
      * billion) otherwise representable. If this is ever an issue in
      * the future, the variable can be changed to be an AtomicLong,
      * and the shift/mask constants below adjusted. But until the need
      * arises, this code is a bit faster and simpler using an int.
      *
      * The workerCount is the number of workers that have been
-     * permitted to start and not permitted to stop.  The value may be
+     * permitted to start and not permitted to stop.  The value may be // workerCount ~= 线程数
      * transiently different from the actual number of live threads,
      * for example when a ThreadFactory fails to create a thread when
      * asked, and when exiting threads are still performing
@@ -379,7 +379,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     private static final int CAPACITY   = (1 << COUNT_BITS) - 1;
 
     // runState is stored in the high-order bits
-    private static final int RUNNING    = -1 << COUNT_BITS;
+    private static final int RUNNING    = -1 << COUNT_BITS; // 高3位 用来表示状态
     private static final int SHUTDOWN   =  0 << COUNT_BITS;
     private static final int STOP       =  1 << COUNT_BITS;
     private static final int TIDYING    =  2 << COUNT_BITS;
@@ -388,7 +388,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     // Packing and unpacking ctl
     private static int runStateOf(int c)     { return c & ~CAPACITY; }
     private static int workerCountOf(int c)  { return c & CAPACITY; }
-    private static int ctlOf(int rs, int wc) { return rs | wc; }
+    private static int ctlOf(int rs, int wc) { return rs | wc; } // runState & workerCount
 
     /*
      * Bit field accessors that don't require unpacking ctl.
@@ -585,7 +585,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * state to a negative value, and clear it upon start (in
      * runWorker).
      */
-    private final class Worker
+    private final class Worker // !!! 线程池的核心是Worker抽象，Worker 持有线程和Runnable，和其他组件一起协同工作
         extends AbstractQueuedSynchronizer
         implements Runnable
     {
@@ -609,7 +609,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         Worker(Runnable firstTask) {
             setState(-1); // inhibit interrupts until runWorker
             this.firstTask = firstTask;
-            this.thread = getThreadFactory().newThread(this);
+            this.thread = getThreadFactory().newThread(this); // thread.start() -> run()
         }
 
         /** Delegates main run loop to outer runWorker  */
@@ -909,7 +909,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                 if (wc >= CAPACITY ||
                     wc >= (core ? corePoolSize : maximumPoolSize))
                     return false;
-                if (compareAndIncrementWorkerCount(c))
+                if (compareAndIncrementWorkerCount(c)) // wokerCount++
                     break retry;
                 c = ctl.get();  // Re-read ctl
                 if (runStateOf(c) != rs)
@@ -922,7 +922,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         boolean workerAdded = false;
         Worker w = null;
         try {
-            w = new Worker(firstTask);
+            w = new Worker(firstTask); // add thread to worker
             final Thread t = w.thread;
             if (t != null) {
                 final ReentrantLock mainLock = this.mainLock;
@@ -947,7 +947,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     mainLock.unlock();
                 }
                 if (workerAdded) {
-                    t.start();
+                    t.start(); // Worker.run()
                     workerStarted = true;
                 }
             }
@@ -1015,7 +1015,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                 if (workerCountOf(c) >= min)
                     return; // replacement not needed
             }
-            addWorker(null, false);
+            addWorker(null, false); // 再补充一个Worker
         }
     }
 
@@ -1051,7 +1051,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
 
             int wc = workerCountOf(c);
 
-            // Are workers subject to culling?
+            // Are workers subject to culling? 是否是多余的 workers
             boolean timed = allowCoreThreadTimeOut || wc > corePoolSize;
 
             if ((wc > maximumPoolSize || (timed && timedOut))
@@ -1063,7 +1063,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
 
             try {
                 Runnable r = timed ?
-                    workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) :
+                    workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) : // 从Queue中取 Runnable
                     workQueue.take();
                 if (r != null)
                     return r;
@@ -1462,7 +1462,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     return true;
                 if (nanos <= 0)
                     return false;
-                nanos = termination.awaitNanos(nanos);
+                nanos = termination.awaitNanos(nanos); // nanos = nanos - spent time
             }
         } finally {
             mainLock.unlock();
@@ -1762,7 +1762,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * However, this method may fail to remove tasks in
      * the presence of interference by other threads.
      */
-    public void purge() {
+    public void purge() { // 清洗
         final BlockingQueue<Runnable> q = workQueue;
         try {
             Iterator<Runnable> it = q.iterator();
@@ -1772,7 +1772,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     it.remove();
             }
         } catch (ConcurrentModificationException fallThrough) {
-            // Take slow path if we encounter interference during traversal.
+            // Take slow path if we encounter interference during traversal. // 并发冲突，先copy一份，然后慢慢处理
             // Make copy for traversal and call remove for cancelled entries.
             // The slow path is more likely to be O(N*N).
             for (Object r : q.toArray())
