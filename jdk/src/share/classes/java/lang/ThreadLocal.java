@@ -71,6 +71,7 @@ import java.util.function.Supplier;
  * @author  Josh Bloch and Doug Lea
  * @since   1.2
  */
+// ThreadLocal 的核心是 ThreadLocalMap，是一个采用开放地址法进行冲突检测的自定义Map
 public class ThreadLocal<T> {
     /**
      * ThreadLocals rely on per-thread linear-probe hash maps attached
@@ -94,7 +95,7 @@ public class ThreadLocal<T> {
     /**
      * The difference between successively generated hash codes - turns
      * implicit sequential thread-local IDs into near-optimally spread
-     * multiplicative hash values for power-of-two-sized tables.
+     * multiplicative（乘法的） hash values for power-of-two-sized tables.
      */
     private static final int HASH_INCREMENT = 0x61c88647;
 
@@ -158,9 +159,9 @@ public class ThreadLocal<T> {
      */
     public T get() {
         Thread t = Thread.currentThread();
-        ThreadLocalMap map = getMap(t);
+        ThreadLocalMap map = getMap(t); // 获取线程 ThreadLocalMap
         if (map != null) {
-            ThreadLocalMap.Entry e = map.getEntry(this);
+            ThreadLocalMap.Entry e = map.getEntry(this); // 获取值，key为 ThreadLocal<?>
             if (e != null) {
                 @SuppressWarnings("unchecked")
                 T result = (T)e.value;
@@ -295,6 +296,7 @@ public class ThreadLocal<T> {
      * used, stale entries are guaranteed to be removed only when
      * the table starts running out of space.
      */
+    // 自定义的Map，不是HashMap，采用开放地址法来解决冲突
     static class ThreadLocalMap {
 
         /**
@@ -391,7 +393,7 @@ public class ThreadLocal<T> {
                         Object value = key.childValue(e.value);
                         Entry c = new Entry(key, value);
                         int h = key.threadLocalHashCode & (len - 1);
-                        while (table[h] != null)
+                        while (table[h] != null) // 开放地址法
                             h = nextIndex(h, len);
                         table[h] = c;
                         size++;
@@ -437,7 +439,7 @@ public class ThreadLocal<T> {
                 if (k == key)
                     return e;
                 if (k == null)
-                    expungeStaleEntry(i);
+                    expungeStaleEntry(i); // 擦除
                 else
                     i = nextIndex(i, len);
                 e = tab[i];
@@ -532,7 +534,7 @@ public class ThreadLocal<T> {
                  (e = tab[i]) != null;
                  i = prevIndex(i, len))
                 if (e.get() == null)
-                    slotToExpunge = i;
+                    slotToExpunge = i; // find pre
 
             // Find either the key or trailing null slot of run, whichever
             // occurs first
@@ -549,7 +551,7 @@ public class ThreadLocal<T> {
                 if (k == key) {
                     e.value = value;
 
-                    tab[i] = tab[staleSlot];
+                    tab[i] = tab[staleSlot]; // swap i & staleSlot, put (k,v) in staleSlot
                     tab[staleSlot] = e;
 
                     // Start expunge at preceding stale entry if it exists
@@ -591,14 +593,14 @@ public class ThreadLocal<T> {
             int len = tab.length;
 
             // expunge entry at staleSlot
-            tab[staleSlot].value = null;
+            tab[staleSlot].value = null; // 清理当前key
             tab[staleSlot] = null;
             size--;
 
             // Rehash until we encounter null
             Entry e;
             int i;
-            for (i = nextIndex(staleSlot, len);
+            for (i = nextIndex(staleSlot, len); // 清理级联key
                  (e = tab[i]) != null;
                  i = nextIndex(i, len)) {
                 ThreadLocal<?> k = e.get();
@@ -623,10 +625,10 @@ public class ThreadLocal<T> {
         }
 
         /**
-         * Heuristically scan some cells looking for stale entries.
+         * Heuristically（启发式的） scan some cells looking for stale entries.
          * This is invoked when either a new element is added, or
          * another stale one has been expunged. It performs a
-         * logarithmic number of scans, as a balance between no
+         * logarithmic（对数的） number of scans, as a balance between no
          * scanning (fast but retains garbage) and a number of scans
          * proportional to number of elements, that would find all
          * garbage but would cause some insertions to take O(n) time.
@@ -658,7 +660,7 @@ public class ThreadLocal<T> {
                     removed = true;
                     i = expungeStaleEntry(i);
                 }
-            } while ( (n >>>= 1) != 0);
+            } while ( (n >>>= 1) != 0); // 循环 log2(n)次
             return removed;
         }
 
@@ -670,7 +672,7 @@ public class ThreadLocal<T> {
         private void rehash() {
             expungeStaleEntries();
 
-            // Use lower threshold for doubling to avoid hysteresis
+            // Use lower threshold for doubling to avoid hysteresis（迟滞）
             if (size >= threshold - threshold / 4)
                 resize();
         }
@@ -681,7 +683,7 @@ public class ThreadLocal<T> {
         private void resize() {
             Entry[] oldTab = table;
             int oldLen = oldTab.length;
-            int newLen = oldLen * 2;
+            int newLen = oldLen * 2; // double size
             Entry[] newTab = new Entry[newLen];
             int count = 0;
 

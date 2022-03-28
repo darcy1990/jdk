@@ -79,6 +79,8 @@ import java.util.Spliterator;
  * @author Doug Lea
  * @param <E> the type of elements held in this collection
  */
+// ArrayBlockingQueue 采用精巧的数据结构，底层使用 数组 + 双指针 实现队列
+// 不支持扩容，初始化的时候就决定了大小
 public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         implements BlockingQueue<E>, java.io.Serializable {
 
@@ -195,7 +197,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         // assert items[removeIndex] != null;
         // assert removeIndex >= 0 && removeIndex < items.length;
         final Object[] items = this.items;
-        if (removeIndex == takeIndex) {
+        if (removeIndex == takeIndex) { // 刚好是 takeIndex
             // removing front item; just advance
             items[takeIndex] = null;
             if (++takeIndex == items.length)
@@ -207,7 +209,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
             // an "interior" remove
 
             // slide over all others up through putIndex.
-            final int putIndex = this.putIndex;
+            final int putIndex = this.putIndex; // removeIndex 右边的元素左移
             for (int i = removeIndex;;) {
                 int next = i + 1;
                 if (next == items.length)
@@ -253,7 +255,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
         if (capacity <= 0)
             throw new IllegalArgumentException();
         this.items = new Object[capacity];
-        lock = new ReentrantLock(fair);
+        lock = new ReentrantLock(fair); // FIFO for threads when fair is true
         notEmpty = lock.newCondition();
         notFull =  lock.newCondition();
     }
@@ -321,9 +323,9 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      *
      * @throws NullPointerException if the specified element is null
      */
-    public boolean offer(E e) {
+    public boolean offer(E e) { // 非阻塞
         checkNotNull(e);
-        final ReentrantLock lock = this.lock;
+        final ReentrantLock lock = this.lock; // good practice to define a local var
         lock.lock();
         try {
             if (count == items.length)
@@ -344,7 +346,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
-    public void put(E e) throws InterruptedException {
+    public void put(E e) throws InterruptedException { // 阻塞，如果队列满了就等待队列pop其他元素
         checkNotNull(e);
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
@@ -365,7 +367,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean offer(E e, long timeout, TimeUnit unit)
+    public boolean offer(E e, long timeout, TimeUnit unit) // 等待队列不为空的时间
         throws InterruptedException {
 
         checkNotNull(e);
@@ -506,7 +508,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
                     }
                     if (++i == items.length)
                         i = 0;
-                } while (i != putIndex);
+                } while (i != putIndex); //  遍历 takeIndex -> putIndex
             }
             return false;
         } finally {
@@ -621,7 +623,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
             final int count = this.count;
             final int len = a.length;
             if (len < count)
-                a = (T[])java.lang.reflect.Array.newInstance(
+                a = (T[])java.lang.reflect.Array.newInstance(  // 对 a 扩容
                     a.getClass().getComponentType(), count);
             int n = items.length - takeIndex;
             if (count <= n)
@@ -685,7 +687,7 @@ public class ArrayBlockingQueue<E> extends AbstractQueue<E>
                 count = 0;
                 if (itrs != null)
                     itrs.queueIsEmpty();
-                for (; k > 0 && lock.hasWaiters(notFull); k--)
+                for (; k > 0 && lock.hasWaiters(notFull); k--) // 最多 k 个 waiter，因为当前队列只能容下 k 个元素
                     notFull.signal();
             }
         } finally {
