@@ -158,7 +158,7 @@ public class CountDownLatch {
      * Synchronization control For CountDownLatch.
      * Uses AQS state to represent count.
      */
-    private static final class Sync extends AbstractQueuedSynchronizer {
+    private static final class Sync extends AbstractQueuedSynchronizer { // 计数抽象
         private static final long serialVersionUID = 4982264981922014374L;
 
         Sync(int count) {
@@ -170,7 +170,7 @@ public class CountDownLatch {
         }
 
         protected int tryAcquireShared(int acquires) {
-            return (getState() == 0) ? 1 : -1;
+            return (getState() == 0) ? 1 : -1; // state === 0 唤醒await
         }
 
         protected boolean tryReleaseShared(int releases) {
