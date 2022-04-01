@@ -163,7 +163,7 @@ public class Semaphore implements java.io.Serializable {
      * to represent permits. Subclassed into fair and nonfair
      * versions.
      */
-    abstract static class Sync extends AbstractQueuedSynchronizer {
+    abstract static class Sync extends AbstractQueuedSynchronizer { // state 信号量抽象
         private static final long serialVersionUID = 1192457210091910933L;
 
         Sync(int permits) {
@@ -242,7 +242,7 @@ public class Semaphore implements java.io.Serializable {
 
         protected int tryAcquireShared(int acquires) {
             for (;;) {
-                if (hasQueuedPredecessors())
+                if (hasQueuedPredecessors()) // FIFO
                     return -1;
                 int available = getState();
                 int remaining = available - acquires;
