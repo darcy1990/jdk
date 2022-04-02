@@ -212,6 +212,7 @@ import java.util.Collection;
  * @since 1.5
  * @author Doug Lea
  */
+// ReentrantReadWriteLock 是AQS 的经典实现，通过 hasQueuedPredecessors 实现公平/非公平锁，通过shared 实现 读/写锁
 public class ReentrantReadWriteLock
         implements ReadWriteLock, java.io.Serializable {
     private static final long serialVersionUID = -6992448646407690164L;
@@ -237,8 +238,8 @@ public class ReentrantReadWriteLock
      * @param fair {@code true} if this lock should use a fair ordering policy
      */
     public ReentrantReadWriteLock(boolean fair) {
-        sync = fair ? new FairSync() : new NonfairSync();
-        readerLock = new ReadLock(this);
+        sync = fair ? new FairSync() : new NonfairSync(); // 是否公平锁
+        readerLock = new ReadLock(this);  // 读写锁
         writerLock = new WriteLock(this);
     }
 
@@ -552,7 +553,7 @@ public class ReentrantReadWriteLock
          * This is identical in effect to tryAcquire except for lack
          * of calls to writerShouldBlock.
          */
-        final boolean tryWriteLock() {
+        final boolean tryWriteLock() { // acquires = 1
             Thread current = Thread.currentThread();
             int c = getState();
             if (c != 0) {
@@ -669,7 +670,7 @@ public class ReentrantReadWriteLock
     static final class NonfairSync extends Sync {
         private static final long serialVersionUID = -8159625535654395037L;
         final boolean writerShouldBlock() {
-            return false; // writers can always barge
+            return false; // writers can always barge（冲撞）
         }
         final boolean readerShouldBlock() {
             /* As a heuristic to avoid indefinite writer starvation,
@@ -679,7 +680,7 @@ public class ReentrantReadWriteLock
              * block if there is a waiting writer behind other enabled
              * readers that have not yet drained from the queue.
              */
-            return apparentlyFirstQueuedIsExclusive();
+            return apparentlyFirstQueuedIsExclusive(); // 遇到 exclusive node，就阻塞
         }
     }
 
@@ -689,7 +690,7 @@ public class ReentrantReadWriteLock
     static final class FairSync extends Sync {
         private static final long serialVersionUID = -2274990926593161451L;
         final boolean writerShouldBlock() {
-            return hasQueuedPredecessors();
+            return hasQueuedPredecessors(); // 只要有 Predecessor 就阻塞
         }
         final boolean readerShouldBlock() {
             return hasQueuedPredecessors();
