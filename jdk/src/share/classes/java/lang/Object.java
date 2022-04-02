@@ -268,7 +268,7 @@ public class Object {
      * @see        java.lang.Object#notifyAll()
      * @see        java.lang.Object#wait()
      */
-    public final native void notify();
+    public final native void notify(); // synchronized + wait/notify
 
     /**
      * Wakes up all threads that are waiting on this object's monitor. A
