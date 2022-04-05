@@ -38,7 +38,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * A synchronization aid that allows a set of threads to all wait for
+ * A synchronization aid that allows a set of threads to all wait for  // 栅栏，等待所有线程到达，然后 release 所有线程；栅栏是可以复用的
  * each other to reach a common barrier point.  CyclicBarriers are
  * useful in programs involving a fixed sized party of threads that
  * must occasionally wait for each other. The barrier is called
@@ -240,7 +240,7 @@ public class CyclicBarrier {
                         throw ie;
                     } else {
                         // We're about to finish waiting even if we had not
-                        // been interrupted, so this interrupt is deemed to
+                        // been interrupted, so this interrupt is deemed to 给下面代码中断
                         // "belong" to subsequent execution.
                         Thread.currentThread().interrupt();
                     }
