@@ -138,7 +138,7 @@ public class Arrays {
      *
      * @param a the array to be sorted
      */
-    public static void sort(int[] a) {
+    public static void sort(int[] a) { // primitive type采用双pivot 快排，速度快
         DualPivotQuicksort.sort(a, 0, a.length - 1, null, 0, 0);
     }
 
@@ -460,7 +460,7 @@ public class Arrays {
     public static void parallelSort(byte[] a) {
         int n = a.length, p, g;
         if (n <= MIN_ARRAY_SORT_GRAN ||
-            (p = ForkJoinPool.getCommonPoolParallelism()) == 1)
+            (p = ForkJoinPool.getCommonPoolParallelism()) == 1) // 是否并发
             DualPivotQuicksort.sort(a, 0, n - 1);
         else
             new ArraysParallelSortHelpers.FJByte.Sorter
@@ -1237,7 +1237,7 @@ public class Arrays {
      *         ordering of the array elements is found to violate the
      *         {@link Comparable} contract
      */
-    public static void sort(Object[] a) {
+    public static void sort(Object[] a) { // 对象采用merge sort，虽然会需要额外空间，但是稳定
         if (LegacyMergeSort.userRequested)
             legacyMergeSort(a);
         else
@@ -2561,7 +2561,7 @@ public class Arrays {
      * @param a2 the other array to be tested for equality
      * @return <tt>true</tt> if the two arrays are equal
      */
-    public static boolean equals(long[] a, long[] a2) {
+    public static boolean equals(long[] a, long[] a2) { // 很棒的方法！！！
         if (a==a2)
             return true;
         if (a==null || a2==null)
@@ -3797,7 +3797,7 @@ public class Arrays {
     /**
      * @serial include
      */
-    private static class ArrayList<E> extends AbstractList<E>
+    private static class ArrayList<E> extends AbstractList<E> // 返回的不是通用的ArrayList
         implements RandomAccess, java.io.Serializable
     {
         private static final long serialVersionUID = -2764017481108945198L;
