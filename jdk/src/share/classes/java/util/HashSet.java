@@ -28,7 +28,7 @@ package java.util;
 import java.io.InvalidObjectException;
 
 /**
- * This class implements the <tt>Set</tt> interface, backed by a hash table
+ * This class implements the <tt>Set</tt> interface, backed by a hash table // 底层用 HashMap 实现
  * (actually a <tt>HashMap</tt> instance).  It makes no guarantees as to the
  * iteration order of the set; in particular, it does not guarantee that the
  * order will remain constant over time.  This class permits the <tt>null</tt>
@@ -95,7 +95,7 @@ public class HashSet<E>
     private transient HashMap<E,Object> map;
 
     // Dummy value to associate with an Object in the backing Map
-    private static final Object PRESENT = new Object();
+    private static final Object PRESENT = new Object(); // map 中的 v必须是对象，Object 应该是最简单的对象了
 
     /**
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
