@@ -758,7 +758,7 @@ public abstract class AbstractMap<K,V> implements Map<K,V> {
          * @throws UnsupportedOperationException always
          */
         public V setValue(V value) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException(); // UnsupportedOperationException 支持 Immutable
         }
 
         /**

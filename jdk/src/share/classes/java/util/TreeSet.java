@@ -300,7 +300,7 @@ public class TreeSet<E> extends AbstractSet<E>
         if (m.size()==0 && c.size() > 0 &&
             c instanceof SortedSet &&
             m instanceof TreeMap) {
-            SortedSet<? extends E> set = (SortedSet<? extends E>) c;
+            SortedSet<? extends E> set = (SortedSet<? extends E>) c; // sorted set 优化处理
             TreeMap<E,Object> map = (TreeMap<E, Object>) m;
             Comparator<?> cc = set.comparator();
             Comparator<? super E> mc = map.comparator();

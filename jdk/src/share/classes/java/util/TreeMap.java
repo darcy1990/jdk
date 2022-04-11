@@ -348,7 +348,7 @@ public class TreeMap<K,V>
         @SuppressWarnings("unchecked")
             Comparable<? super K> k = (Comparable<? super K>) key;
         Entry<K,V> p = root;
-        while (p != null) {
+        while (p != null) { // 非递归的方式，避免过深的栈
             int cmp = k.compareTo(p.key);
             if (cmp < 0)
                 p = p.left;
@@ -555,7 +555,7 @@ public class TreeMap<K,V>
                 else if (cmp > 0)
                     t = t.right;
                 else
-                    return t.setValue(value);
+                    return t.setValue(value); // 找到了，直接replace
             } while (t != null);
         }
         else {
@@ -574,12 +574,12 @@ public class TreeMap<K,V>
                     return t.setValue(value);
             } while (t != null);
         }
-        Entry<K,V> e = new Entry<>(key, value, parent);
+        Entry<K,V> e = new Entry<>(key, value, parent); // 找到了parent
         if (cmp < 0)
             parent.left = e;
         else
             parent.right = e;
-        fixAfterInsertion(e);
+        fixAfterInsertion(e); // 插入后，做平衡调整
         size++;
         modCount++;
         return null;
@@ -696,7 +696,7 @@ public class TreeMap<K,V>
      *         does not permit null keys
      * @since 1.6
      */
-    public Map.Entry<K,V> lowerEntry(K key) {
+    public Map.Entry<K,V> lowerEntry(K key) { // TODO 画一下数的算法
         return exportEntry(getLowerEntry(key));
     }
 
@@ -888,7 +888,7 @@ public class TreeMap<K,V>
     /**
      * @since 1.6
      */
-    public NavigableMap<K, V> descendingMap() {
+    public NavigableMap<K, V> descendingMap() { // 这个方法很棒！！！
         NavigableMap<K, V> km = descendingMap;
         return (km != null) ? km :
             (descendingMap = new DescendingSubMap<>(this,
@@ -2143,7 +2143,7 @@ public class TreeMap<K,V>
     static <K,V> TreeMap.Entry<K,V> successor(Entry<K,V> t) {
         if (t == null)
             return null;
-        else if (t.right != null) {
+        else if (t.right != null) { // 右节点不为空，找到右子树的最左侧的节点
             Entry<K,V> p = t.right;
             while (p.left != null)
                 p = p.left;
@@ -2151,7 +2151,7 @@ public class TreeMap<K,V>
         } else {
             Entry<K,V> p = t.parent;
             Entry<K,V> ch = t;
-            while (p != null && ch == p.right) {
+            while (p != null && ch == p.right) { // 如果是左节点，直接返回父节点；如果是右节点，继续往上找父节点
                 ch = p;
                 p = p.parent;
             }
