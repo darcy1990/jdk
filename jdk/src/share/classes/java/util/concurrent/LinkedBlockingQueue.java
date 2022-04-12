@@ -77,6 +77,7 @@ import java.util.function.Consumer;
  * @author Doug Lea
  * @param <E> the type of elements held in this collection
  */
+// 基于链表的阻塞队列，默认容量 2^31 可以设定容量
 public class LinkedBlockingQueue<E> extends AbstractQueue<E>
         implements BlockingQueue<E>, java.io.Serializable {
     private static final long serialVersionUID = -6903933977591709194L;
@@ -212,7 +213,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
         Node<E> h = head;
         Node<E> first = h.next;
         h.next = h; // help GC
-        head = first;
+        head = first; // head is dummy
         E x = first.item;
         first.item = null;
         return x;
@@ -247,7 +248,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
      * {@link Integer#MAX_VALUE}.
      */
     public LinkedBlockingQueue() {
-        this(Integer.MAX_VALUE);
+        this(Integer.MAX_VALUE); // 最大容量 2^31
     }
 
     /**
@@ -350,7 +351,7 @@ public class LinkedBlockingQueue<E> extends AbstractQueue<E>
                 notFull.await();
             }
             enqueue(node);
-            c = count.getAndIncrement();
+            c = count.getAndIncrement(); // getAndIncrement返回之前的值
             if (c + 1 < capacity)
                 notFull.signal();
         } finally {
