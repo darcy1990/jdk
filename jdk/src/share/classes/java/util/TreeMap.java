@@ -493,17 +493,17 @@ public class TreeMap<K,V>
         while (p != null) {
             int cmp = compare(key, p.key);
             if (cmp > 0) {
-                if (p.right != null)
+                if (p.right != null) // 右侧节点不为空，递归
                     p = p.right;
                 else
-                    return p;
+                    return p; // 右侧节点为空，肯定是当前节点了
             } else {
-                if (p.left != null) {
+                if (p.left != null) { // 左侧节点不为空，递归
                     p = p.left;
                 } else {
                     Entry<K,V> parent = p.parent;
                     Entry<K,V> ch = p;
-                    while (parent != null && ch == parent.left) {
+                    while (parent != null && ch == parent.left) { // 如果是p是left节点，那么根节点比p大，那么我们继续往上找，直到p是right节点，那么parent是就是符合条件的节点（之前的节点都大于parent）
                         ch = parent;
                         parent = parent.parent;
                     }
