@@ -158,6 +158,8 @@ import java.io.IOException;
  * @see     Hashtable
  * @since   1.4
  */
+// map + linkedlist
+// 支持按访问顺序排序 （支持删除oldest node），也支持按插入顺序排序
 public class LinkedHashMap<K,V>
     extends HashMap<K,V>
     implements Map<K,V>
@@ -230,7 +232,7 @@ public class LinkedHashMap<K,V>
 
     // apply src's links to dst
     private void transferLinks(LinkedHashMap.Entry<K,V> src,
-                               LinkedHashMap.Entry<K,V> dst) {
+                               LinkedHashMap.Entry<K,V> dst) { // src 替换 成 dst
         LinkedHashMap.Entry<K,V> b = dst.before = src.before;
         LinkedHashMap.Entry<K,V> a = dst.after = src.after;
         if (b == null)
