@@ -79,6 +79,7 @@ import java.util.function.Consumer;
  * @author Josh Bloch, Doug Lea
  * @param <E> the type of elements held in this collection
  */
+// 底层是用数组实现的堆
 public class PriorityQueue<E> extends AbstractQueue<E>
     implements java.io.Serializable {
 
@@ -87,7 +88,7 @@ public class PriorityQueue<E> extends AbstractQueue<E>
     private static final int DEFAULT_INITIAL_CAPACITY = 11;
 
     /**
-     * Priority queue represented as a balanced binary heap: the two
+     * Priority queue represented as a balanced binary heap: the two // 平衡二叉堆，用数组来表示堆， n -> (2n + 1, 2n + 2)
      * children of queue[n] are queue[2*n+1] and queue[2*(n+1)].  The
      * priority queue is ordered by comparator, or by the elements'
      * natural ordering, if comparator is null: For each node n in the
@@ -341,7 +342,7 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         if (i == 0)
             queue[0] = e;
         else
-            siftUp(i, e);
+            siftUp(i, e); // insert and pop
         return true;
     }
 
@@ -618,9 +619,9 @@ public class PriorityQueue<E> extends AbstractQueue<E>
         else {
             E moved = (E) queue[s];
             queue[s] = null;
-            siftDown(i, moved);
-            if (queue[i] == moved) {
-                siftUp(i, moved);
+            siftDown(i, moved); // 先将末尾元素moved 移到i
+            if (queue[i] == moved) { // 发现 moved 在顶端
+                siftUp(i, moved); // 继续将 moved 往上移动
                 if (queue[i] != moved)
                     return moved;
             }
