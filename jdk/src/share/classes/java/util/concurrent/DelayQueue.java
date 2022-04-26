@@ -67,11 +67,12 @@ import java.util.*;
  * @author Doug Lea
  * @param <E> the type of elements held in this collection
  */
+// DelayQueue 底层是优先队列，按照等待时间排列
 public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
     implements BlockingQueue<E> {
 
     private final transient ReentrantLock lock = new ReentrantLock();
-    private final PriorityQueue<E> q = new PriorityQueue<E>();
+    private final PriorityQueue<E> q = new PriorityQueue<E>(); // 底层是优先队列
 
     /**
      * Thread designated to wait for the element at the head of
@@ -213,8 +214,8 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
                     long delay = first.getDelay(NANOSECONDS);
                     if (delay <= 0)
                         return q.poll();
-                    first = null; // don't retain ref while waiting
-                    if (leader != null)
+                    first = null; // don't retain ref while waiting ，等待的时候清空不必要的ref
+                    if (leader != null) // 用head记录当前是否需要等待，避免多线程无效 timed-waiting
                         available.await();
                     else {
                         Thread thisThread = Thread.currentThread();
