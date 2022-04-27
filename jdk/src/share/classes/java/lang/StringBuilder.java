@@ -73,6 +73,7 @@ package java.lang;
  * @see         java.lang.String
  * @since       1.5
  */
+// 底层和可变数组，数组大小一般留有余量
 public final class StringBuilder
     extends AbstractStringBuilder
     implements java.io.Serializable, CharSequence

@@ -94,6 +94,7 @@ import java.util.Arrays;
  * @see     java.lang.String
  * @since   JDK1.0
  */
+// StringBuilder的线程安全版本，使用synchronize进行同步
  public final class StringBuffer
     extends AbstractStringBuilder
     implements java.io.Serializable, CharSequence
@@ -555,7 +556,7 @@ import java.util.Arrays;
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
-    public  StringBuffer insert(int offset, boolean b) {
+    public  StringBuffer insert(int offset, boolean b) { // 调用 insert(int, String)时会同步
         // Note, synchronization achieved via invocation of StringBuffer insert(int, String)
         // after conversion of b to String by super class method
         // Ditto for toStringCache clearing

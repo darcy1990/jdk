@@ -468,7 +468,7 @@ public final class Integer extends Number implements Comparable<Integer> {
                                       99999999, 999999999, Integer.MAX_VALUE };
 
     // Requires positive x
-    static int stringSize(int x) {
+    static int stringSize(int x) { // 预计算
         for (int i=0; ; i++)
             if (x <= sizeTable[i])
                 return i+1;
