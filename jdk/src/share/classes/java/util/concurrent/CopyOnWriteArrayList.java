@@ -88,6 +88,7 @@ import java.util.function.UnaryOperator;
  * @author Doug Lea
  * @param <E> the type of elements held in this collection
  */
+// 写时复制，修改不会影响之前的读，弱一致性
 public class CopyOnWriteArrayList<E>
     implements List<E>, RandomAccess, Cloneable, java.io.Serializable {
     private static final long serialVersionUID = 8673264195747942595L;
@@ -411,7 +412,7 @@ public class CopyOnWriteArrayList<E>
 
             if (oldValue != element) {
                 int len = elements.length;
-                Object[] newElements = Arrays.copyOf(elements, len);
+                Object[] newElements = Arrays.copyOf(elements, len); // copy on write
                 newElements[index] = element;
                 setArray(newElements);
             } else {
@@ -531,7 +532,7 @@ public class CopyOnWriteArrayList<E>
      * A version of remove(Object) using the strong hint that given
      * recent snapshot contains o at the given index.
      */
-    private boolean remove(Object o, Object[] snapshot, int index) {
+    private boolean remove(Object o, Object[] snapshot, int index) { // remove 之前 arr可能变化
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -539,17 +540,17 @@ public class CopyOnWriteArrayList<E>
             int len = current.length;
             if (snapshot != current) findIndex: {
                 int prefix = Math.min(index, len);
-                for (int i = 0; i < prefix; i++) {
+                for (int i = 0; i < prefix; i++) { // 优先在 0 ~ prefix 之间查找
                     if (current[i] != snapshot[i] && eq(o, current[i])) {
                         index = i;
                         break findIndex;
                     }
                 }
-                if (index >= len)
+                if (index >= len) // o 已被移除
                     return false;
-                if (current[index] == o)
+                if (current[index] == o) // 找到了 o， 位置没有变动
                     break findIndex;
-                index = indexOf(o, current, index, len);
+                index = indexOf(o, current, index, len); // 有元素在前面插入了，index 在后面
                 if (index < 0)
                     return false;
             }
@@ -769,7 +770,7 @@ public class CopyOnWriteArrayList<E>
             Object[] elements = getArray();
             int len = elements.length;
             int added = 0;
-            // uniquify and compact elements in cs
+            // uniquify and compact elements in cs // 如果 e 不在array中，就讲将 e 放在cs中，类似于原地存储
             for (int i = 0; i < cs.length; ++i) {
                 Object e = cs[i];
                 if (indexOf(e, elements, 0, len) < 0 &&
